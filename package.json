@@ -1,0 +1,53 @@
+{
+  "name": "tokamak",
+  "version": "0.0.1",
+  "description": "Tokamak bundler",
+  "main": "src/tokamak.js",
+  "type": "module",
+  "engines": {
+    "node": ">=14.17.0"
+  },
+  "imports": {
+    "#url": {
+      "node": "./src/conditional_imports/url-node.js",
+      "default": "./src/conditional_imports/url-browser.js"
+    },
+    "#fs": {
+      "node": "./src/conditional_imports/fs-node.js",
+      "default": "./src/conditional_imports/fs-browser.js"
+    }
+  },
+  "scripts": {
+    "test": "ava -v"
+  },
+  "ava": {
+    "files": [
+      "**/*.spec.js"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmaevsky/tokamak.git"
+  },
+  "keywords": [
+    "bundler",
+    "isomorphic"
+  ],
+  "author": "Ellxoft",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dmaevsky/tokamak/issues"
+  },
+  "homepage": "https://github.com/dmaevsky/tokamak#readme",
+  "dependencies": {
+    "rd-parse": "^3.4.0"
+  },
+  "peerDependencies": {
+    "conclure": "^2",
+    "quarx": "^3 >=3.3"
+  },
+  "devDependencies": {
+    "acorn": "^8.4.1",
+    "ava": "^3.15.0"
+  }
+}
