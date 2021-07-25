@@ -1,6 +1,5 @@
 import { conclude } from 'conclure';
 import { all } from 'conclure/combinators';
-import { fetchFile, getFetchFromJSDelivr, DELIVR_CDN } from './fetch';
 import tokamak from '../tokamak.js';
 import { asyncCell } from './async_cell.js';
 
@@ -18,6 +17,7 @@ function evalUMD(id, code) {
 function instantiateModule(node, _require, environment) {
   const instantiate = node.code;
 
+  // Save an empty module in node (in order to support circular require)
   const module = node.code = {
     exports: {}
   };
@@ -44,40 +44,23 @@ function instantiateModule(node, _require, environment) {
 
 export default (options = {}) => {
   const {
-    graph = {},
+    loader,
+    onStale,
     logger = console.debug,
     environment
   } = options;
 
-  const fetchFromJSDelivr = getFetchFromJSDelivr(graph, logger);
-
-  function* fetchModule(url) {
-    const fetched = yield (url.startsWith('npm://') || url.startsWith(DELIVR_CDN)
-      ? fetchFromJSDelivr(url)
-      : fetchFile(url, logger)
-    );
-
-    if (url === fetched.url && url.endsWith('.json')) {
-      return {
-        url,
-        text: `module.exports = ${fetched.text}`
-      };
-    }
-    return fetched;
-  }
-
-  const loadModule = tokamak({ fetchModule, logger }, graph);
+  const loadModule = tokamak({
+    loader,
+    logger,
+  });
 
   function requireModule(url, baseUrl) {
-    if (!url && baseUrl) {
-      // Resolve bundle case
-      return graph[baseUrl] && requireModule(baseUrl);
-    }
 
-    const node = asyncCell(
-      loadModule(url, baseUrl),
-      { STALE: STALE_REQUIRE }
-    );
+    const node = asyncCell(loadModule(url, baseUrl), {
+      name: `[loadModule]:${baseUrl}=>${url}`,
+      onStale
+    });
 
     const { id, code, imports = {} } = node;
 
@@ -105,11 +88,7 @@ export default (options = {}) => {
     return node.code.exports;
   }
 
-  requireModule.hydrate = (cb) => conclude(all(
-    Object.keys(graph)
-      .filter(id => !id.includes('=>'))
-      .map(id => loadModule(id))
-  ), cb);
+  requireModule.hydrate = (urls, cb) => conclude(all(urls.map(id => loadModule(id))), cb);
 
   return requireModule;
 }
