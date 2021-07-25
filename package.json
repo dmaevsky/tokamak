@@ -1,21 +1,15 @@
 {
   "name": "tokamak",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Tokamak bundler",
   "main": "src/tokamak.js",
   "type": "module",
   "engines": {
     "node": ">=14.17.0"
   },
-  "imports": {
-    "#url": {
-      "node": "./src/conditional_imports/url-node.js",
-      "default": "./src/conditional_imports/url-browser.js"
-    },
-    "#fs": {
-      "node": "./src/conditional_imports/fs-node.js",
-      "default": "./src/conditional_imports/fs-browser.js"
-    }
+  "exports": {
+    ".": "./src/tokamak.js",
+    "./dynamic": "./src/runtime/tokamak_dynamic.js"
   },
   "scripts": {
     "test": "ava -v"
