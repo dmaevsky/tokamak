@@ -39,10 +39,6 @@ export default ({
 
         Object.assign(node, { code, imports, required });
       }
-      else if (node.src && node.code === undefined) {
-        const { code } = yield fs.load(node.src);
-        node.code = code;
-      }
 
       loadStack = loadStack.concat(id);
 
