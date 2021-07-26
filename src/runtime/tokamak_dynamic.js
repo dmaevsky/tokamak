@@ -1,5 +1,3 @@
-import { conclude } from 'conclure';
-import { all } from 'conclure/combinators';
 import tokamak from '../tokamak.js';
 import { asyncCell } from './async_cell.js';
 
@@ -87,8 +85,6 @@ export default (options = {}) => {
     instantiateModule(node, p => requireModule(p, id), environment);
     return node.code.exports;
   }
-
-  requireModule.hydrate = (urls, cb) => conclude(all(urls.map(id => loadModule(id))), cb);
 
   return requireModule;
 }

@@ -1,6 +1,6 @@
 {
   "name": "tokamak",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Tokamak bundler",
   "main": "src/tokamak.js",
   "type": "module",

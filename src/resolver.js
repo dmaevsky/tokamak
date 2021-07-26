@@ -39,7 +39,7 @@ export default ({ loader: { load, isDirectory, isFile } }) => {
       }
     }
 
-    if (resolved.includes('%2f') || resolved.includes('%5C')) {
+    if (resolved && (resolved.includes('%2f') || resolved.includes('%5C'))) {
       throw new Error(`Invalid Module Specifier (${importee})`);
     }
     return resolved;
@@ -368,7 +368,7 @@ export default ({ loader: { load, isDirectory, isFile } }) => {
 
     try {
       const { code } = yield load(pjsonURL);
-      return code;
+      return JSON.parse(code);
     }
     catch (error) {
       throw new Error(`Invalid Package Configuration (${error.message})`);
