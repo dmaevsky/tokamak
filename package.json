@@ -1,6 +1,6 @@
 {
   "name": "tokamak",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Tokamak bundler",
   "main": "src/tokamak.js",
   "type": "module",
@@ -37,8 +37,7 @@
     "rd-parse": "^3.4.0"
   },
   "peerDependencies": {
-    "conclure": "^2",
-    "quarx": "^3 >=3.3"
+    "conclure": "^2"
   },
   "devDependencies": {
     "acorn": "^8.4.1",

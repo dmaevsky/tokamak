@@ -1,5 +1,5 @@
+import { conclude } from 'conclure';
 import tokamak from '../tokamak.js';
-import { asyncCell } from './async_cell.js';
 
 function evalUMD(id, code) {
   const script = document.createElement('script');
@@ -54,12 +54,19 @@ export default (options = {}) => {
   });
 
   function requireModule(url, baseUrl) {
+    const loadFlow = loadModule(url, baseUrl);
 
-    const node = asyncCell(loadModule(url, baseUrl), {
-      name: `[loadModule]:${baseUrl}=>${url}`,
-      onStale
-    });
+    let r = null;
+    const cancel = conclude(loadFlow, (error, result) => r = { error, result });
 
+    if (!r) {
+      // loadFlow did not conclude synchronously
+      return onStale(url, baseUrl, loadFlow, cancel);
+    }
+
+    if (r.error) throw r.error;
+
+    const node = r.result;
     const { id, code, imports = {} } = node;
 
     if (typeof code === 'object') {
