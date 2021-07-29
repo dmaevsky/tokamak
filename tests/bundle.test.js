@@ -1,12 +1,11 @@
 import test from "ava";
 import tokamak from "../src/tokamak.js";
 import { conclude } from "conclure";
-import { allSettled } from "conclure/combinators";
 
-test("integration test", async (t) => {
+test("basic integration test", async (t) => {
   let requireGraph = {};
 
-  let fileMap = {
+  const fileMap = {
     "file:///file1.js": 'import test from "ava";\nexport default 42;',
   };
 
@@ -15,12 +14,13 @@ test("integration test", async (t) => {
       if (!url.startsWith("file://")) {
         throw new Error(`Don't know how to load ${url}`);
       }
-      // this would normally be async
-      requireGraph[url] = fileMap[url];
-      return {
+
+      requireGraph[url] = {
         id: url,
-        code: fileMap[url],
+        code: fileMap[url], // this gets transpiled later
       };
+
+      return requireGraph[url];
     },
     isDirectory(url) {
       return false;
@@ -37,18 +37,27 @@ test("integration test", async (t) => {
     },
   });
 
-  function* build(args) {
-    const urls = args.map((arg) => `file:///${arg}`);
-    yield allSettled(urls.map((url) => loadModule(url)));
-  }
-
-  await conclude(build(["file1.js"]), (err, contents) => {
-    if (err) console.error(err);
-    else console.log(contents);
-  });
+  await conclude(
+    (function* () {
+      yield loadModule("file:///file1.js");
+    })(),
+    (err, contents) => {
+      if (err) console.error(err);
+      else console.log(contents);
+    }
+  );
 
   t.deepEqual(requireGraph, {
-    "file:///file1.js": `import test from "ava";\nexport default 42;`,
-    "file:///package.json": undefined,
+    "file:///file1.js": {
+      id: "file:///file1.js",
+      code:
+        "const __ellx_import__0 = require('ava');\n" +
+        "var test = 'default' in __ellx_import__0 ? __ellx_import__0.default : __ellx_import__0;\n" +
+        "\n" +
+        "exports.default = 42;",
+      imports: { ava: { default: "test" } },
+      required: [],
+    },
+    "file:///package.json": { id: "file:///package.json", code: undefined },
   });
 });
