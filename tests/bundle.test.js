@@ -2,7 +2,7 @@ import test from "ava";
 import tokamak from "../src/tokamak.js";
 import { conclude } from "conclure";
 
-test("basic integration test", async (t) => {
+test("basic integration test", (t) => {
   let requireGraph = {};
 
   const fileMap = {
@@ -37,15 +37,10 @@ test("basic integration test", async (t) => {
     },
   });
 
-  await conclude(
-    (function* () {
-      yield loadModule("file:///file1.js");
-    })(),
-    (err, contents) => {
-      if (err) console.error(err);
-      else console.log(contents);
-    }
-  );
+  conclude(loadModule("file:///file1.js"), (err, contents) => {
+    if (err) console.error(err);
+    else console.log(contents);
+  });
 
   t.deepEqual(requireGraph, {
     "file:///file1.js": {
