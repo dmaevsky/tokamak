@@ -2,7 +2,7 @@ import test from "ava";
 import tokamak from "../src/tokamak.js";
 import { conclude } from "conclure";
 
-test("basic integration test", (t) => {
+test.cb("basic integration test", (t) => {
   let requireGraph = {};
 
   const fileMap = {
@@ -38,21 +38,19 @@ test("basic integration test", (t) => {
   });
 
   conclude(loadModule("file:///file1.js"), (err, contents) => {
-    if (err) console.error(err);
-    else console.log(contents);
-  });
-
-  t.deepEqual(requireGraph, {
-    "file:///file1.js": {
-      id: "file:///file1.js",
-      code:
-        "const __ellx_import__0 = require('ava');\n" +
-        "var test = 'default' in __ellx_import__0 ? __ellx_import__0.default : __ellx_import__0;\n" +
-        "\n" +
-        "exports.default = 42;",
-      imports: { ava: { default: "test" } },
-      required: [],
-    },
-    "file:///package.json": { id: "file:///package.json", code: undefined },
+    t.deepEqual(requireGraph, {
+      "file:///file1.js": {
+        id: "file:///file1.js",
+        code:
+          "const __ellx_import__0 = require('ava');\n" +
+          "var test = 'default' in __ellx_import__0 ? __ellx_import__0.default : __ellx_import__0;\n" +
+          "\n" +
+          "exports.default = 42;",
+        imports: { ava: { default: "test" } },
+        required: [],
+      },
+      "file:///package.json": { id: "file:///package.json", code: undefined },
+    });
+    t.end();
   });
 });
