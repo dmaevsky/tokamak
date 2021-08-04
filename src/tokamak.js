@@ -1,6 +1,7 @@
 import { allSettled } from 'conclure/combinators';
 import { transform } from './cjs.js';
 import resolver from './resolver.js';
+import memoize from './memoize_flow.js';
 
 export default ({
   loader: fs,
@@ -18,11 +19,15 @@ export default ({
       throw new Error(`Failed to resolve ${url} from ${baseUrl}`);
     }
 
+    return loadResolved(id, loadStack);
+  }
+
+  const loadResolved = memoize(function* loadResolved(id, loadStack) {
     try {
       const node = yield fs.load(id);
 
       if (typeof node === 'string') {
-        return loadModule(node, null, loadStack);
+        return loadResolved(node, loadStack);
       }
 
       if (loadStack.includes(id)) {
@@ -56,7 +61,7 @@ export default ({
         error
       ].filter(Boolean).join(' ');
 
-      logger('info', error, url, baseUrl, loadStack);
+      logger('info', error, id, loadStack);
 
       return {
         id,
@@ -64,7 +69,7 @@ export default ({
         imports: {}
       };
     }
-  }
+  });
 
   return loadModule;
 }
