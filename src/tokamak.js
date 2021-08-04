@@ -69,7 +69,7 @@ export default ({
         imports: {}
       };
     }
-  });
+  }, [Infinity, 1000]);
 
   return loadModule;
 }
