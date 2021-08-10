@@ -1,30 +1,39 @@
 import test from "ava";
 import tokamak from "../src/tokamak.js";
-import { conclude } from "conclure";
+import { conclude, whenFinished } from "conclure";
 
-const fakeLoader = (fileMap, requireGraph) => ({
+const fakeLoader = (fileMap) => ({
   load: function* load(url) {
     if (!url.startsWith("file://")) {
       throw new Error(`Don't know how to load ${url}`);
     }
 
-    requireGraph[url] = {
-      id: url,
-      code: fileMap[url], // this gets transpiled later
-    };
-
-    return requireGraph[url];
+    return fileMap[url];
   },
   isDirectory(url) {
     throw Error("This test should not call isDirectory");
   },
   isFile(url) {
-    return Object.keys(fileMap).includes(url);
+    return url in fileMap;
   },
 });
 
 test.cb("basic integration test", (t) => {
-  let requireGraph = {};
+  const requireGraph = {};
+
+  const memoize = fn => (id, ...args) => {
+    if (id in requireGraph) {
+      return requireGraph[id];
+    }
+
+    const flow = fn(id, ...args);
+
+    whenFinished(flow, ({ cancelled, error, result }) => {
+      if (!cancelled) requireGraph[id] = error || result;
+    });
+
+    return requireGraph[id] = flow;
+  }
 
   const fileMap = {
     "file:///file1.js": 'import test from "./ava";\nexport default 42;',
@@ -32,7 +41,8 @@ test.cb("basic integration test", (t) => {
   };
 
   const loadModule = tokamak({
-    loader: fakeLoader(fileMap, requireGraph),
+    loader: fakeLoader(fileMap),
+    memoize,
     logger: (level, ...messages) => {
       console.log(`[${level.toUpperCase()}]`, ...messages);
     },

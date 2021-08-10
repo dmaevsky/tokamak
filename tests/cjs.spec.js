@@ -12,8 +12,6 @@ function testSingle(t, code) {
   const ast = parse(code).map(ignoreEnd);
   const acornAst = transform(acorn.parse(code, { sourceType: 'module' })).map(ignoreEnd);
 
-  t.snapshot({ code, ast, acornAst });
-
   t.deepEqual(acornAst, ast);
 }
 

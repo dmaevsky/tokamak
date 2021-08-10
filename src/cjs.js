@@ -4,19 +4,20 @@ import Parser from 'rd-parse';
 export const parse = Parser(CodeFile);
 
 export function transform(code) {
+  const imports = {};
+  const required = [];
+
   const ast = parse(code);
 
   if (!ast.length) {
-    return { code };
+    return { code, imports, required };
   }
 
-  const imports = {};
-  let required = [];
   let delta = 0;
 
   for (let { type, module, mapping, start, end } of ast) {
     if (type === 'require') {
-      required = required.concat(module);
+      required.push(module);
       continue;
     }
 

@@ -1,4 +1,4 @@
-# Snapshot report for `src/bundler/imports_grammar.spec.js`
+# Snapshot report for `tests/imports_grammar.spec.js`
 
 The actual snapshot is saved in `imports_grammar.spec.js.snap`.
 

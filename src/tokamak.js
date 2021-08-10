@@ -1,10 +1,10 @@
 import { allSettled } from 'conclure/combinators';
 import { transform } from './cjs.js';
 import resolver from './resolver.js';
-import memoize from './memoize_flow.js';
 
 export default ({
   loader: fs,
+  memoize = fn => fn,
   logger = console.debug,
 }) => {
 
@@ -12,7 +12,7 @@ export default ({
     loader: fs
   });
 
-  function* loadModule(url, baseUrl, loadStack = []) {
+  function* loadModule(url, baseUrl, loadStack = new Map()) {
     const id = yield resolveId(url, baseUrl);
 
     if (!id || typeof id !== 'string') {
@@ -23,29 +23,17 @@ export default ({
   }
 
   const loadResolved = memoize(function* loadResolved(id, loadStack) {
+    if (loadStack.has(id)) {
+      // Circular reference
+      return loadStack.get(id);
+    }
+
     try {
-      const node = yield fs.load(id);
+      const node = transform(yield fs.load(id));
+      node.id = id;
 
-      if (typeof node === 'string') {
-        return loadResolved(node, loadStack);
-      }
-
-      if (loadStack.includes(id)) {
-        // Circular reference
-        return node;
-      }
-
-      if (!node.imports) {
-        const {
-          code,
-          imports = {},
-          required = []
-        } = transform(node.code);     // node.code is either esm, umd or cjs
-
-        Object.assign(node, { code, imports, required });
-      }
-
-      loadStack = loadStack.concat(id);
+      loadStack = new Map(loadStack);
+      loadStack.set(id, node);
 
       yield allSettled(Object.keys(node.imports).concat(node.required || [])
         .map(module => loadModule(module, id, loadStack)),
@@ -61,7 +49,7 @@ export default ({
         error
       ].filter(Boolean).join(' ');
 
-      logger('info', error, id, loadStack);
+      logger('info', error, id, [...loadStack.keys()]);
 
       return {
         id,
@@ -69,7 +57,7 @@ export default ({
         imports: {}
       };
     }
-  }, [Infinity, 1000]);
+  });
 
   return loadModule;
 }
