@@ -367,8 +367,7 @@ export default ({ loader: { load, isDirectory, isFile } }) => {
     if (!exists) return null;
 
     try {
-      const { code } = yield load(pjsonURL);
-      return JSON.parse(code);
+      return JSON.parse(yield load(pjsonURL));
     }
     catch (error) {
       throw new Error(`Invalid Package Configuration (${error.message})`);
