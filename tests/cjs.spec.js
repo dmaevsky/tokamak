@@ -1,7 +1,7 @@
 import test from 'ava';
 import * as acorn from 'acorn';
 import { readFileSync } from 'fs';
-import { parse } from '../src/cjs.js';
+import { parse, transform as toCJS } from '../src/cjs.js';
 
 import { transform } from './acorn_adapter.js';
 
@@ -160,4 +160,15 @@ test(`export { default as y } from './y.js';\nexport default 42`, t => {
 
 test(`export default function(x) {};`, t => {
   testSingle(t, `export default function(x) {};`);
+});
+
+test('collect required', t => {
+  const code = 'var foo = require("../bar.js")'
+  const node = toCJS(code);
+
+  t.deepEqual(node, {
+    code: '\n' + code,
+    imports: {},
+    required: ["../bar.js"]
+  });
 });

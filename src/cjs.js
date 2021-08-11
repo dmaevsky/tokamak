@@ -5,7 +5,7 @@ export const parse = Parser(CodeFile);
 
 export function transform(code) {
   const imports = {};
-  const required = [];
+  let required = [];
 
   const ast = parse(code);
 
@@ -17,7 +17,7 @@ export function transform(code) {
 
   for (let { type, module, mapping, start, end } of ast) {
     if (type === 'require') {
-      required.push(module);
+      required = required.concat(module);   // module is an array here
       continue;
     }
 
