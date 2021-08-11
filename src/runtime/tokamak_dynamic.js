@@ -43,6 +43,7 @@ function instantiateModule(node, _require, environment) {
 export default (options = {}) => {
   const {
     loader,
+    memoize,
     onStale,
     logger = console.debug,
     environment
@@ -50,6 +51,7 @@ export default (options = {}) => {
 
   const loadModule = tokamak({
     loader,
+    memoize,
     logger,
   });
 
