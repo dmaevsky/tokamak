@@ -29,7 +29,13 @@ export default ({
     }
 
     try {
-      const node = transform(yield fs.load(id));
+      let body = yield fs.load(id);
+
+      if (fs.transform) {
+        body = yield fs.transform(id, body);
+      }
+
+      const node = transform(body);
       node.id = id;
 
       loadStack = new Map(loadStack);
