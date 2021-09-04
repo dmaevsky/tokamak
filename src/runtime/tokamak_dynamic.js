@@ -31,6 +31,9 @@ function instantiateModule(node, _require, environment) {
     instantiate(module, module.exports, process, window, _require);
   }
   catch (error) {
+    // Revert state to "uninstantiated" on error
+    node.code = instantiate;
+
     if (!error.requireStack) {
       error = new Error(`Error instantiating ${node.id}: ${error.message}`);
       error.requireStack = [node.id];
