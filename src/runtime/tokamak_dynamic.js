@@ -34,11 +34,12 @@ function instantiateModule(node, _require, environment) {
     // Revert state to "uninstantiated" on error
     node.code = instantiate;
 
-    if (!error.requireStack) {
-      error = new Error(`Error instantiating ${node.id}: ${error.message}`);
-      error.requireStack = [node.id];
+    if (error instanceof Error) {
+      if (!error.requireStack) {
+        error.requireStack = [node.id];
+      }
+      else error.requireStack.push(node.id);
     }
-    else error.requireStack.push(node.id);
     throw error;
   }
 }
