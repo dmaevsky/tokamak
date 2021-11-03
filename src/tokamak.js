@@ -1,16 +1,12 @@
 import { allSettled } from 'conclure/combinators';
 import { transform } from './cjs.js';
-import resolver from './resolver.js';
 
 export default ({
-  loader: fs,
+  resolveId,
+  load,
   memoize = fn => fn,
   logger = console.debug,
 }) => {
-
-  const resolveId = resolver({
-    loader: fs
-  });
 
   function* loadModule(url, baseUrl, loadStack = new Map()) {
     const id = yield resolveId(url, baseUrl);
@@ -29,11 +25,7 @@ export default ({
     }
 
     try {
-      let body = yield fs.load(id);
-
-      if (fs.transform) {
-        body = yield fs.transform(id, body);
-      }
+      const body = yield load(id);
 
       const node = transform(body);
       node.id = id;

@@ -1,6 +1,6 @@
 {
   "name": "tokamak",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Tokamak bundler",
   "main": "src/tokamak.js",
   "type": "module",
@@ -9,7 +9,7 @@
   },
   "exports": {
     ".": "./src/tokamak.js",
-    "./dynamic": "./src/runtime/tokamak_dynamic.js"
+    "./resolve": "./src/resolver.js"
   },
   "scripts": {
     "test": "ava -v"

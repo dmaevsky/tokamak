@@ -1,5 +1,6 @@
 import test from "ava";
 import tokamak from "../src/tokamak.js";
+import resolver from "../src/resolver.js";
 import { conclude, whenFinished } from "conclure";
 
 const fakeLoader = (fileMap) => ({
@@ -9,6 +10,9 @@ const fakeLoader = (fileMap) => ({
     }
 
     return fileMap[url];
+  },
+  loadPkgJSON(url) {
+    throw Error("This test should not call loadPkgJSON");
   },
   isDirectory(url) {
     throw Error("This test should not call isDirectory");
@@ -40,8 +44,13 @@ test.cb("basic integration test", (t) => {
     "file:///ava.js": "export default 20;",
   };
 
+  const { load, ...resolverParams } = fakeLoader(fileMap);
+
+  const resolveId = resolver(resolverParams);
+
   const loadModule = tokamak({
-    loader: fakeLoader(fileMap),
+    resolveId,
+    load,
     memoize,
     logger: (level, ...messages) => {
       console.log(`[${level.toUpperCase()}]`, ...messages);

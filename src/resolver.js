@@ -11,7 +11,7 @@ function isValidURL(url) {
   }
 }
 
-export default ({ loader: { load, isDirectory, isFile } }) => {
+export default ({ isDirectory, isFile, loadPkgJSON }) => {
   function* ESM_RESOLVE(importee, importer) {
     let resolved;
 
@@ -367,7 +367,7 @@ export default ({ loader: { load, isDirectory, isFile } }) => {
     if (!exists) return null;
 
     try {
-      return JSON.parse(yield load(pjsonURL));
+      return yield loadPkgJSON(pjsonURL);
     }
     catch (error) {
       throw new Error(`Invalid Package Configuration (${error.message})`);

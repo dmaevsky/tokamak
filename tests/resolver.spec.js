@@ -31,16 +31,12 @@ function* isFile(id) {
   }
 }
 
-const loader = {
-  *load(url) {
-    return fs.readFile(join(rootDir, fileURLToPath(url)), 'utf8');
-  },
+function* loadPkgJSON(url) {
+  const body = yield fs.readFile(join(rootDir, fileURLToPath(url)), 'utf8');
+  return JSON.parse(body);
+}
 
-  isDirectory,
-  isFile
-};
-
-const resolve = resolver({ loader });
+const resolve = resolver({ isDirectory, isFile, loadPkgJSON });
 
 test('Resolve an NPM module', async t => {
   const importee = "rd-parse";
