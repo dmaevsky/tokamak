@@ -11,7 +11,7 @@ function isValidURL(url) {
   }
 }
 
-export default ({ isDirectory, isFile, loadPkgJSON }) => {
+export default ({ isFile, loadPkgJSON }) => {
   function* ESM_RESOLVE(importee, importer) {
     let resolved;
 
@@ -71,20 +71,21 @@ export default ({ isDirectory, isFile, loadPkgJSON }) => {
     while (true) {
       const packageURL = new URL('node_modules/' + packageName + '/', parentURL).href;
 
-      if (! (yield isDirectory(packageURL))) {
-        if (parentURL === 'file:///') {
-          throw new Error(`Module Not Found (${packageSpecifier})`);
-        }
-        parentURL = new URL('../', parentURL).href;
-        continue;
-      }
-
-      const resolved = yield RESOLVE_FROM_PACKAGE_JSON(packageURL, packageSubpath);
+      let resolved = yield RESOLVE_FROM_PACKAGE_JSON(packageURL, packageSubpath);
       if (resolved) return resolved;
 
-      if (packageSubpath === '.') return RESOLVE_AS_INDEX(packageURL);
+      if (packageSubpath === '.') {
+        resolved = yield RESOLVE_AS_INDEX(packageURL);
+      }
+      else {
+        resolved = yield RESOLVE_AS_FILE_OR_DIRECTORY(new URL(packageSubpath, packageURL).href);
+      }
+      if (resolved) return resolved;
 
-      return RESOLVE_AS_FILE_OR_DIRECTORY(new URL(packageSubpath, packageURL).href);
+      if (parentURL === 'file:///') {
+        throw new Error(`Module Not Found (${packageSpecifier})`);
+      }
+      parentURL = new URL('../', parentURL).href;
     }
   }
 

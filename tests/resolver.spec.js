@@ -11,16 +11,6 @@ const run = promisify(conclude);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
 
-function* isDirectory(id) {
-  try {
-    const stats = yield fs.stat(join(rootDir, fileURLToPath(id)));
-    return stats.isDirectory();
-  }
-  catch {
-    return false;
-  }
-}
-
 function* isFile(id) {
   try {
     const stats = yield fs.stat(join(rootDir, fileURLToPath(id)));
@@ -36,7 +26,7 @@ function* loadPkgJSON(url) {
   return JSON.parse(body);
 }
 
-const resolve = resolver({ isDirectory, isFile, loadPkgJSON });
+const resolve = resolver({ isFile, loadPkgJSON });
 
 test('Resolve an NPM module', async t => {
   const importee = "rd-parse";

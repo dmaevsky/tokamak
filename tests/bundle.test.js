@@ -14,9 +14,6 @@ const fakeLoader = (fileMap) => ({
   loadPkgJSON(url) {
     throw Error("This test should not call loadPkgJSON");
   },
-  isDirectory(url) {
-    throw Error("This test should not call isDirectory");
-  },
   isFile(url) {
     return url in fileMap;
   },
