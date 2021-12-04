@@ -34,7 +34,7 @@ export default ({
       loadStack.set(id, node);
 
       yield allSettled(Object.keys(node.imports).concat(node.required || [])
-        .map(module => loadModule(module, id, loadStack)),
+        .map(module => loadModule(module, id, loadStack))
       );
 
       return node;
